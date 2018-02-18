@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import subprocess, json, os
 from optparse import OptionParser
 
@@ -43,7 +44,7 @@ else:
 num = ''
 if args:
   if not args[0].isdigit():
-    print "'server_number' must be a numeric value"
+    print("'server_number' must be a numeric value")
     exit()
   num = int(args[0])
 
@@ -58,7 +59,7 @@ def extract_name(instance):
 if options.bust_cache or not os.path.exists(cache_file_list) \
   or options.profile:
 
-  print "Fetching servers..."
+  print("Fetching servers...")
   if os.path.exists(cache_file_num):
     os.remove(cache_file_num)
   aws_cmd = 'aws ec2 describe-instances --output json'
@@ -72,10 +73,10 @@ if options.bust_cache or not os.path.exists(cache_file_list) \
   output = child.stdout.read()
   error = child.stderr.read()
   if error:
-    print error
-    print 'Unable to fetch any servers.'
+    print(error)
+    print('Unable to fetch any servers.')
     exit()
-  with open(cache_file_list, 'w') as f:
+  with open(cache_file_list, 'wb') as f:
     f.write(output)
 
 output = open(cache_file_list).read()
@@ -83,7 +84,7 @@ parsed = json.loads(output)
 
 all_instances = []
 if not parsed['Reservations']:
-  print 'Coult not find any servers.'
+  print('Coult not find any servers.')
   if os.path.exists(cache_file_list):
     os.remove(cache_file_list)
   exit()
@@ -95,11 +96,11 @@ if options.grep:
   all_instances = [inst for inst in all_instances if options.grep in extract_name(inst)]
 
 if not num:
-  print "\nServers list:\n"
+  print("\nServers list:\n")
   for i, instance in enumerate(all_instances, 1):
     choice = '[%d]' % i
     name = extract_name(instance)
-    print '%-4s %-35s %-55s' % (choice, name + (35 - len(name)) * '.', instance['PublicDnsName'])
+    print('%-4s %-35s %-55s' % (choice, name + (35 - len(name)) * '.', instance['PublicDnsName']))
 
 default_num = 1
 if os.path.exists(cache_file_num):
@@ -107,7 +108,7 @@ if os.path.exists(cache_file_num):
 ok = not not num
 while not ok or not num:
   try:
-    num = raw_input("\nWhich server would you like to connect to [" +
+    num = input("\nWhich server would you like to connect to [" +
             str(default_num) + "]? ")
     if not num:
       num = int(default_num)
@@ -116,9 +117,9 @@ while not ok or not num:
     if ok:
       num = int(num)
       break
-    print "ERR: please enter a value between 1 and " + str(i)
+    print("ERR: please enter a value between 1 and " + str(i))
   except (EOFError, KeyboardInterrupt) as e:
-    print "\nExiting..."
+    print("\nExiting...")
     exit()
 
 with open(cache_file_num, 'w') as f:
@@ -131,5 +132,5 @@ identity = ''
 if options.identity and os.path.exists(options.identity):
   identity = "-i %s " % options.identity
 
-print "\nConnecting to", extract_name(instance), dns
+print("\nConnecting to", extract_name(instance), dns)
 os.system('ssh %s%s@%s' % (identity, options.user, dns))
