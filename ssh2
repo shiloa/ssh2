@@ -112,7 +112,7 @@ if os.path.exists(cache_file_num):
 ok = not not num
 while not ok or not num:
   try:
-    num = input("\nWhich server would you like to connect to [" +
+    num = input_func("\nWhich server would you like to connect to [" +
             str(default_num) + "]? ")
     if not num:
       num = int(default_num)
